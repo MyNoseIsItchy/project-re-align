@@ -1,0 +1,388 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <!-- Responsive viewport: keep the actual device width, but do not disable user zoom. -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#101310">
+  <meta name="application-name" content="PROJECT RE:ALIGN">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="RE:ALIGN">
+  <link rel="manifest" href="./manifest.json">
+  <link rel="icon" type="image/png" sizes="192x192" href="./icons/icon-192.png">
+  <link rel="apple-touch-icon" href="./icons/icon-192.png">
+  <meta name="description" content="A private, offline-first personal planning and life management app.">
+  <title>PROJECT RE:ALIGN</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg:#101310; --panel:#191e1a; --panel-2:#202720; --panel-3:#29332b;
+      --line:#303a31; --text:#eef3ee; --muted:#9ba79d; --green:#85d69b;
+      --green-dark:#183b25; --blue:#83b9f4; --red:#ff8989; --amber:#efc477;
+      --radius:17px; --nav-h:68px; --content-w:680px;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    * { box-sizing:border-box; }
+    html { width:100%; min-height:100%; background:var(--bg); -webkit-text-size-adjust:100%; text-size-adjust:100%; }
+    body { margin:0; width:100%; min-width:0; min-height:100vh; min-height:100dvh; background:var(--bg); color:var(--text); -webkit-tap-highlight-color:transparent; overflow-x:clip; }
+    button, input, select, textarea { font:inherit; }
+    button { cursor:pointer; touch-action:manipulation; }
+    #app { width:100%; max-width:var(--content-w); min-height:100vh; min-height:100dvh; margin:0 auto; position:relative; background:var(--bg); overflow-x:clip; }
+    .topbar { position:sticky; top:0; z-index:20; padding:calc(12px + env(safe-area-inset-top)) 18px 12px; display:flex; align-items:center; justify-content:space-between; gap:12px; background:rgba(16,19,16,.94); border-bottom:1px solid rgba(255,255,255,.06); backdrop-filter:blur(14px); }
+    .brand { font-size:12px; font-weight:800; letter-spacing:.16em; color:var(--green); }
+    .top-date { color:var(--muted); font-size:12px; text-align:right; }
+    main { padding:18px 16px calc(var(--nav-h) + 28px + env(safe-area-inset-bottom)); min-width:0; }
+    .bottom-nav { position:fixed; z-index:50; bottom:0; left:50%; transform:translateX(-50%); width:min(100%, var(--content-w)); min-height:var(--nav-h); padding:7px 8px calc(7px + env(safe-area-inset-bottom)); display:grid; grid-template-columns:repeat(5,1fr); gap:3px; background:rgba(25,30,26,.97); border-top:1px solid var(--line); backdrop-filter:blur(16px); }
+    .nav-btn { min-width:0; border:0; border-radius:12px; color:var(--muted); background:transparent; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; padding:5px 2px; font-size:10px; font-weight:650; }
+    .nav-btn .nav-icon { font-size:18px; line-height:1; }
+    .nav-btn.active { color:var(--green); background:rgba(133,214,155,.09); }
+    h1 { font-size:26px; letter-spacing:-.035em; line-height:1.15; margin:5px 0 7px; }
+    h2 { font-size:20px; letter-spacing:-.02em; margin:0; }
+    h3 { margin:0; font-size:14px; }
+    p { margin:0; }
+    .muted { color:var(--muted); }
+    .small { font-size:12px; line-height:1.5; }
+    .tiny { font-size:11px; }
+    .green { color:var(--green); } .red { color:var(--red); } .blue { color:var(--blue); } .amber { color:var(--amber); }
+    .page-head { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:18px; }
+    .page-head p { margin-top:5px; color:var(--muted); font-size:13px; line-height:1.45; }
+    .stack { display:grid; gap:13px; }
+    .grid2 { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+    .grid3 { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:9px; }
+    .card { background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); padding:15px; min-width:0; }
+    .card.soft { background:var(--panel-2); }
+    .card-head { display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:12px; }
+    .stat { min-width:0; }
+    .stat .value { font-size:24px; font-weight:800; line-height:1.15; margin:5px 0 2px; overflow-wrap:anywhere; }
+    .stat .label { color:var(--muted); font-size:11px; }
+    .eyebrow { font-size:10px; color:var(--muted); font-weight:800; letter-spacing:.13em; text-transform:uppercase; }
+    .divider { height:1px; background:var(--line); margin:12px 0; }
+    .btn { border:1px solid var(--line); background:var(--panel-3); color:var(--text); padding:10px 13px; border-radius:11px; font-size:13px; font-weight:700; min-height:40px; }
+    .btn.primary { background:var(--green); color:#102016; border-color:var(--green); }
+    .btn.ghost { background:transparent; }
+    .btn.danger { color:var(--red); border-color:rgba(255,137,137,.35); background:rgba(255,137,137,.06); }
+    .btn.blue { color:var(--blue); border-color:rgba(131,185,244,.4); background:rgba(131,185,244,.08); }
+    .btn.full { width:100%; }
+    .btn.small-btn { min-height:32px; padding:6px 9px; font-size:11px; }
+    .button-row { display:flex; flex-wrap:wrap; gap:8px; }
+    .field { display:grid; gap:6px; min-width:0; }
+    label { color:var(--muted); font-size:11px; font-weight:650; }
+    input, select, textarea { width:100%; min-width:0; color:var(--text); background:#111713; border:1px solid #39443b; border-radius:10px; padding:11px 12px; font-size:16px; outline:none; }
+    input:focus, select:focus, textarea:focus { border-color:var(--green); box-shadow:0 0 0 2px rgba(133,214,155,.12); }
+    textarea { min-height:84px; resize:vertical; line-height:1.45; }
+    input[type="checkbox"], input[type="radio"] { width:auto; accent-color:var(--green); }
+    input[type="range"] { padding:0; accent-color:var(--green); }
+    .form-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:11px; }
+    .form-grid .span2 { grid-column:1/-1; }
+    .list { display:grid; gap:8px; }
+    .list-item { display:flex; align-items:flex-start; gap:10px; justify-content:space-between; background:var(--panel-2); border:1px solid var(--line); padding:11px; border-radius:12px; min-width:0; }
+    .item-main { min-width:0; flex:1; }
+    .item-title { font-size:13px; font-weight:700; overflow-wrap:anywhere; }
+    .item-meta { color:var(--muted); font-size:11px; line-height:1.45; margin-top:4px; overflow-wrap:anywhere; }
+    .item-actions { display:flex; gap:5px; align-items:center; flex-shrink:0; }
+    .icon-btn { border:0; background:transparent; color:var(--muted); padding:5px 7px; border-radius:8px; font-size:14px; }
+    .icon-btn:hover { background:var(--panel-3); color:var(--text); }
+    .pill { display:inline-flex; align-items:center; border:1px solid var(--line); border-radius:99px; padding:4px 8px; font-size:10px; color:var(--muted); white-space:nowrap; }
+    .pill.green { color:var(--green); border-color:rgba(133,214,155,.3); background:rgba(133,214,155,.07); }
+    .pill.amber { color:var(--amber); border-color:rgba(239,196,119,.3); background:rgba(239,196,119,.07); }
+    .pill.red { color:var(--red); border-color:rgba(255,137,137,.3); background:rgba(255,137,137,.07); }
+    .progress { height:7px; background:#303a32; border-radius:99px; overflow:hidden; margin-top:8px; }
+    .progress > span { display:block; height:100%; background:var(--green); border-radius:99px; }
+    .empty { text-align:center; padding:20px 12px; color:var(--muted); font-size:12px; border:1px dashed var(--line); border-radius:12px; }
+    .notice { border-radius:12px; padding:12px; background:rgba(239,196,119,.08); border:1px solid rgba(239,196,119,.24); color:#e7d3aa; font-size:12px; line-height:1.5; }
+    .success-note { border-radius:12px; padding:12px; background:rgba(133,214,155,.07); border:1px solid rgba(133,214,155,.2); color:#c6e9ce; font-size:12px; line-height:1.5; }
+    .segmented { display:flex; gap:4px; background:#101612; border:1px solid var(--line); border-radius:11px; padding:4px; }
+    .segmented button { flex:1; border:0; background:transparent; color:var(--muted); padding:8px 5px; border-radius:8px; font-size:11px; font-weight:700; }
+    .segmented button.selected { background:var(--panel-3); color:var(--green); }
+    .menu-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+    .menu-card { display:flex; flex-direction:column; gap:7px; text-align:left; min-height:112px; padding:14px; border:1px solid var(--line); background:var(--panel); border-radius:15px; color:var(--text); }
+    .menu-card .emoji { font-size:21px; }
+    .menu-card strong { font-size:13px; }
+    .menu-card span:last-child { color:var(--muted); font-size:11px; line-height:1.4; }
+    .bar-row { display:grid; grid-template-columns:86px 1fr auto; gap:8px; align-items:center; font-size:11px; margin:9px 0; }
+    .bar-track { height:7px; background:#303a32; border-radius:99px; overflow:hidden; }
+    .bar-track span { height:100%; display:block; background:var(--blue); border-radius:99px; }
+    .sticky-actions { display:flex; flex-wrap:wrap; gap:7px; }
+    .mono { font-variant-numeric:tabular-nums; }
+    .hidden { display:none !important; }
+    @media (max-width:390px) { main { padding-left:12px; padding-right:12px; } .card { padding:13px; } .grid3 { gap:7px; } .stat .value { font-size:21px; } }
+    @media (min-width:681px) { body { background:#0b0e0b; } #app { border-left:1px solid rgba(255,255,255,.04); border-right:1px solid rgba(255,255,255,.04); } }
+    @media (prefers-reduced-motion:no-preference) { .btn, .nav-btn, .menu-card { transition:background .15s ease,border-color .15s ease,transform .15s ease; } .menu-card:active,.btn:active { transform:scale(.985); } }
+  </style>
+</head>
+<body>
+<div id="app">
+  <header class="topbar"><div><div class="brand">PROJECT RE:ALIGN</div><div class="tiny muted">A quieter, more intentional way forward</div></div><div class="top-date" id="topDate"></div></header>
+  <main id="view" aria-live="polite"></main>
+  <nav class="bottom-nav" aria-label="Main navigation">
+    <button class="nav-btn active" data-tab="today"><span class="nav-icon">⌂</span><span>Today</span></button>
+    <button class="nav-btn" data-tab="tasks"><span class="nav-icon">☷</span><span>Tasks</span></button>
+    <button class="nav-btn" data-tab="recovery"><span class="nav-icon">♡</span><span>Recovery</span></button>
+    <button class="nav-btn" data-tab="career"><span class="nav-icon">▤</span><span>Career</span></button>
+    <button class="nav-btn" data-tab="more"><span class="nav-icon">•••</span><span>More</span></button>
+  </nav>
+</div>
+<script>
+(() => {
+  'use strict';
+  const KEY = 'project_realign_v2';
+  const $ = (s, root=document) => root.querySelector(s);
+  const $$ = (s, root=document) => [...root.querySelectorAll(s)];
+  const today = () => { const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; };
+  const dateLabel = (date=today(), opts={weekday:'short',month:'short',day:'numeric',year:'numeric'}) => { const d=new Date(`${date}T12:00:00`); return Number.isNaN(d.getTime())?date:d.toLocaleDateString(undefined,opts); };
+  const uid = () => (crypto?.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(16).slice(2)}`);
+  const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const money = n => new Intl.NumberFormat('en-PH',{style:'currency',currency:'PHP',maximumFractionDigits:2}).format(Number(n)||0);
+  const num = v => Number.isFinite(Number(v)) ? Number(v) : 0;
+  const monthKey = (d=today()) => d.slice(0,7);
+  const defaults = () => ({
+    version:2, profile:{name:'Rollan',focus:'Build a life that is healthy, sustainable, and meaningful.'},
+    tasks:[], nicotine:[], cravings:[], reflections:{}, health:[], healthSettings:{clearance:'Awaiting professional clearance', restrictions:'', nextAppointment:''},
+    workLogs:[], careerItems:[], learning:[], transactions:[], debts:[], budgets:{}, goals:[], lifeLogs:[], weeklyReviews:[]
+  });
+  let state = loadState();
+  let tab = 'today'; let sub = 'menu'; let taskFilter='all'; let transactionFilter='month';
+
+  function loadState(){
+    try { const raw=localStorage.getItem(KEY); if(!raw) return defaults(); const parsed=JSON.parse(raw); return {...defaults(),...parsed,profile:{...defaults().profile,...(parsed.profile||{})},healthSettings:{...defaults().healthSettings,...(parsed.healthSettings||{})}}; }
+    catch(e){ console.warn('Could not load saved data',e); return defaults(); }
+  }
+  function save(){
+    try { localStorage.setItem(KEY,JSON.stringify(state)); $('#saveStatus')?.replaceChildren(document.createTextNode('Saved on this device')); return true; }
+    catch(e){ alert('The browser could not save your data. Export a backup and free some device storage.'); return false; }
+  }
+  function update(patch){ state={...state,...patch}; save(); render(); }
+  function addTo(key,item){ state[key]=[item,...(state[key]||[])]; save(); render(); }
+  function delFrom(key,id){ if(!confirm('Delete this entry? This cannot be undone unless you have a backup.')) return; state[key]=(state[key]||[]).filter(x=>x.id!==id); save(); render(); }
+  function pageHead(title,desc,back=false){ return `<div class="page-head"><div>${back?'<button class="btn ghost small-btn" data-action="back">← Back</button>':''}<h1>${title}</h1><p>${esc(desc||'')}</p></div></div>`; }
+  function empty(text){ return `<div class="empty">${esc(text)}</div>`; }
+  function card(title,body,extra=''){ return `<section class="card ${extra}"><div class="card-head"><h3>${title}</h3></div>${body}</section>`; }
+  function stat(label,value,sub='',color=''){ return `<div class="card stat"><div class="label">${esc(label)}</div><div class="value ${color}">${value}</div><div class="tiny muted">${esc(sub)}</div></div>`; }
+  function optionList(items,selected){ return items.map(x=>`<option value="${esc(x)}" ${x===selected?'selected':''}>${esc(x)}</option>`).join(''); }
+  function taskItem(t){ return `<div class="list-item"><button class="icon-btn" data-action="task-toggle" data-id="${esc(t.id)}" aria-label="Toggle task">${t.completed?'🟢':'◯'}</button><div class="item-main"><div class="item-title ${t.completed?'muted':''}" style="${t.completed?'text-decoration:line-through':''}">${esc(t.title)}</div><div class="item-meta">${esc(t.category)} · ${esc(t.priority||'Normal')} priority · ${esc(t.date||'No date')}${t.hours?` · ${esc(t.hours)}h`:''}</div></div><div class="item-actions"><button class="icon-btn" data-action="task-delete" data-id="${esc(t.id)}" aria-label="Delete">✕</button></div></div>`; }
+  function render(){
+    $('#topDate').textContent=new Date().toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric'});
+    $$('.nav-btn').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));
+    const view=$('#view');
+    if(tab==='today') view.innerHTML=renderToday();
+    else if(tab==='tasks') view.innerHTML=renderTasks();
+    else if(tab==='recovery') view.innerHTML=renderRecovery();
+    else if(tab==='career') view.innerHTML=renderCareer();
+    else view.innerHTML=renderMore();
+    view.scrollTop=0;
+  }
+  function renderToday(){
+    const d=today(), todays=state.tasks.filter(t=>t.date===d), done=todays.filter(t=>t.completed).length;
+    const nic=state.nicotine.filter(x=>x.date===d).length, sleep=state.health.find(x=>x.date===d)?.sleep;
+    const monthTx=state.transactions.filter(x=>x.date?.startsWith(monthKey()));
+    const exp=monthTx.filter(x=>x.type!=='Income').reduce((a,x)=>a+num(x.amount),0);
+    const inc=monthTx.filter(x=>x.type==='Income').reduce((a,x)=>a+num(x.amount),0);
+    const refl=state.reflections[d]||{well:'',drained:'',better:''};
+    const taskList=todays.slice(0,4).map(taskItem).join('')||empty('No tasks scheduled for today. Add one small, realistic priority.');
+    return `${pageHead(`Good day${state.profile.name?`, ${esc(state.profile.name)}`:''}.`,'You do not need to fix everything today. Focus on the next useful step.')}
+      <div class="grid2">
+        ${stat('Today’s tasks',`${done}/${todays.length}`,todays.length?`${Math.round(done/todays.length*100)}% completed`:'Nothing scheduled')}
+        ${stat('Nicotine logged',nic,'Entries today',nic?'red':'green')}
+        ${stat('Sleep last logged',sleep?`${esc(sleep)}h`:'—','Hours of sleep')}
+        ${stat('This month · net',money(inc-exp),'Income minus expenses',(inc-exp)>=0?'green':'red')}
+      </div>
+      <div class="stack" style="margin-top:13px">
+        ${card('Today’s focus',`<div class="list">${taskList}</div><button class="btn full" data-tab="tasks" style="margin-top:10px">Open task manager</button>`)}
+        ${card('Daily check-in',`<form data-form="reflection" class="stack">
+          <div class="field"><label>What went well today?</label><textarea name="well" placeholder="A small win counts…">${esc(refl.well)}</textarea></div>
+          <div class="field"><label>What drained my energy?</label><textarea name="drained" placeholder="Notice it without judging yourself…">${esc(refl.drained)}</textarea></div>
+          <div class="field"><label>What is one helpful adjustment for tomorrow?</label><textarea name="better" placeholder="One realistic next step…">${esc(refl.better)}</textarea></div>
+          <button class="btn primary full" type="submit">Save check-in</button></form>`)}
+        <div class="success-note"><strong>Reminder:</strong> Recovery is part of progress. A lighter day can still be a successful day.</div>
+      </div>`;
+  }
+  function renderTasks(){
+    const filtered=state.tasks.filter(t=>taskFilter==='all'||(taskFilter==='open'?!t.completed:t.completed)).sort((a,b)=>(a.date||'').localeCompare(b.date||''));
+    return `${pageHead('Task manager','Keep work and personal commitments visible without letting the list run your day.')}
+      <section class="card"><div class="card-head"><h3>Add a task</h3></div><form data-form="task" class="stack">
+        <div class="field"><label>Task</label><input name="title" required maxlength="160" placeholder="What is the next concrete action?" /></div>
+        <div class="form-grid"><div class="field"><label>Area</label><select name="category">${optionList(['Technical Writer','Business Analyst','Health & Recovery','Finances','Personal Life','Home / Admin'],'Business Analyst')}</select></div><div class="field"><label>Due date</label><input type="date" name="date" value="${today()}" /></div><div class="field"><label>Priority</label><select name="priority">${optionList(['Low','Normal','High'],'Normal')}</select></div><div class="field"><label>Estimated hours</label><input type="number" name="hours" min="0" max="24" step="0.25" placeholder="Optional" /></div></div>
+        <button class="btn primary full" type="submit">Add task</button></form></section>
+      <div class="segmented" style="margin:13px 0"><button class="${taskFilter==='all'?'selected':''}" data-action="task-filter" data-value="all">All</button><button class="${taskFilter==='open'?'selected':''}" data-action="task-filter" data-value="open">Open</button><button class="${taskFilter==='done'?'selected':''}" data-action="task-filter" data-value="done">Completed</button></div>
+      <div class="list">${filtered.map(taskItem).join('')||empty('No tasks in this view.')}</div>`;
+  }
+  function renderRecovery(){
+    const d=today(), slips=state.nicotine.filter(x=>x.date===d), cravings=state.cravings.filter(x=>x.date===d);
+    const weekStart=new Date(); weekStart.setDate(weekStart.getDate()-6); const start=`${weekStart.getFullYear()}-${String(weekStart.getMonth()+1).padStart(2,'0')}-${String(weekStart.getDate()).padStart(2,'0')}`;
+    const recent=state.nicotine.filter(x=>x.date>=start).length;
+    const triggerOpts=['Work stress','After a meal','Finishing a task','Boredom / loneliness','Social situation','Coffee / caffeine','Other'];
+    const logs=[...state.nicotine.map(x=>({...x,kind:'Nicotine'})),...state.cravings.map(x=>({...x,kind:x.outcome||'Craving'}))].sort((a,b)=>(b.createdAt||'').localeCompare(a.createdAt||'')).slice(0,8);
+    return `${pageHead('Recovery center','Track patterns, practice a pause, and treat slips as information—not failure.')}
+      <div class="grid2">${stat('Nicotine entries today',slips.length,'Cigarette / vape logs',slips.length?'red':'green')}${stat('Cravings resisted',cravings.filter(x=>x.outcome==='Resisted').length,'Today')}${stat('Nicotine entries · 7 days',recent,'Recent pattern')}${stat('Cravings logged today',cravings.length,'All outcomes')}</div>
+      <section class="card" style="margin-top:13px"><div class="card-head"><h3>Log a craving or nicotine use</h3></div><form data-form="recovery" class="stack">
+        <div class="field"><label>What happened?</label><select name="outcome"><option>Craving only</option><option>Resisted</option><option>Used cigarette</option><option>Used vape</option></select></div>
+        <div class="field"><label>Trigger</label><select name="trigger">${optionList(triggerOpts,triggerOpts[0])}</select></div>
+        <div class="form-grid"><div class="field"><label>Craving intensity (1–10)</label><input name="intensity" type="number" min="1" max="10" value="5" /></div><div class="field"><label>Quantity (optional)</label><input name="quantity" type="number" min="0" step="0.5" placeholder="e.g. 1" /></div></div>
+        <div class="field"><label>What helped / what was happening?</label><textarea name="note" placeholder="Optional context…"></textarea></div>
+        <button class="btn primary full" type="submit">Save recovery log</button></form></section>
+      <section class="card" style="margin-top:13px"><div class="card-head"><h3>5-minute urge reset</h3><span class="pill green">Try now</span></div><p class="small muted">Pause before acting. Put both feet on the floor, breathe slowly, drink water, and move away from the trigger. Reassess the urge after a few minutes.</p><div class="button-row" style="margin-top:11px"><button class="btn" data-action="urge-step">Start a 60-second pause</button></div><p id="urgeMessage" class="small green" style="margin-top:9px"></p></section>
+      <section class="card" style="margin-top:13px"><div class="card-head"><h3>Recent recovery log</h3></div><div class="list">${logs.map(x=>`<div class="list-item"><div class="item-main"><div class="item-title">${esc(x.kind)} · ${esc(x.trigger||'No trigger selected')}</div><div class="item-meta">${esc(x.date)} · ${esc(x.time||'')} · Intensity ${esc(x.intensity||'—')}/10 ${x.quantity?`· Qty ${esc(x.quantity)}`:''}<br>${esc(x.note||'')}</div></div><span class="pill ${x.kind==='Used cigarette'||x.kind==='Used vape'||x.kind==='Nicotine'?'red':'green'}">${esc(x.outcome||x.kind)}</span></div>`).join('')||empty('No recovery entries yet. Your first honest log is a useful start.')}</div></section>
+      <p class="small muted" style="margin-top:12px">Nicotine dependence can be difficult to manage alone. A doctor, pharmacist, or qualified cessation service can help you choose evidence-based support, including whether nicotine replacement is appropriate.</p>`;
+  }
+  function renderBody(){
+    const logs=state.health.slice().sort((a,b)=>b.date.localeCompare(a.date)); const latest=logs[0]||{};
+    return `${pageHead('Body & health','A simple record of sleep, energy, symptoms, and recovery. Use clinician guidance for exercise decisions.',true)}
+      <div class="notice">Exercise clearance is a medical decision. This tracker records the status you enter; it does not assess an injury or authorize return to running, lifting, or other strenuous activity.</div>
+      <section class="card" style="margin-top:13px"><div class="card-head"><h3>Daily body check-in</h3></div><form data-form="health" class="stack">
+        <div class="form-grid"><div class="field"><label>Date</label><input name="date" type="date" value="${today()}" required></div><div class="field"><label>Sleep (hours)</label><input name="sleep" type="number" min="0" max="24" step="0.25" placeholder="e.g. 7" /></div><div class="field"><label>Water (glasses)</label><input name="water" type="number" min="0" max="40" step="1" placeholder="e.g. 8" /></div><div class="field"><label>Weight (kg, optional)</label><input name="weight" type="number" min="0" max="400" step="0.1" placeholder="Optional" /></div><div class="field"><label>Energy (1–10)</label><input name="energy" type="number" min="1" max="10" placeholder="Optional" /></div><div class="field"><label>Pain / discomfort (0–10)</label><input name="pain" type="number" min="0" max="10" placeholder="Optional" /></div><div class="field"><label>Mood</label><select name="mood">${optionList(['','Very low','Low','Okay','Good','Very good'],'Okay')}</select></div><div class="field"><label>Activity (optional)</label><select name="activity">${optionList(['','Rest day','Walking','Mobility / PT exercise','Cycling','Strength training','Running','Other'],'')}</select></div><div class="field span2"><label>Notes / symptoms / recovery observations</label><textarea name="notes" placeholder="What did you notice? Keep it factual and useful for your clinician."></textarea></div></div>
+        <button class="btn primary full" type="submit">Save daily check-in</button></form></section>
+      <section class="card" style="margin-top:13px"><div class="card-head"><h3>Medical / rehab status</h3></div><form data-form="health-settings" class="stack">
+        <div class="field"><label>Professional clearance status</label><select name="clearance">${optionList(['Awaiting professional clearance','Cleared with restrictions','Cleared for gradual return','Fully cleared'],state.healthSettings.clearance)}</select></div>
+        <div class="field"><label>Restrictions or instructions from clinician</label><textarea name="restrictions" placeholder="Enter only instructions given by your PT / doctor.">${esc(state.healthSettings.restrictions)}</textarea></div>
+        <div class="field"><label>Next appointment</label><input name="nextAppointment" type="date" value="${esc(state.healthSettings.nextAppointment)}"></div>
+        <button class="btn full" type="submit">Save rehab status</button></form>
+        <p class="small muted" style="margin-top:10px">Current status: <strong class="amber">${esc(state.healthSettings.clearance)}</strong></p>
+      </section>
+      <section class="card" style="margin-top:13px"><div class="card-head"><h3>Recent body check-ins</h3></div><div class="list">${logs.slice(0,12).map(x=>`<div class="list-item"><div class="item-main"><div class="item-title">${esc(dateLabel(x.date))}</div><div class="item-meta">Sleep ${x.sleep?esc(x.sleep)+'h':'—'} · Water ${x.water?esc(x.water)+' glasses':'—'} · Energy ${esc(x.energy||'—')} · Pain ${esc(x.pain||'—')}<br>${esc([x.weight?`${x.weight} kg`:null,x.mood,x.activity,x.notes].filter(Boolean).join(' · '))}</div></div><button class="icon-btn" data-action="delete" data-key="health" data-id="${esc(x.id)}">✕</button></div>`).join('')||empty('No health records yet.')}</div></section>`;
+  }
+  function renderCareer(){
+    const work=state.workLogs.slice().sort((a,b)=>(b.date+b.createdAt).localeCompare(a.date+a.createdAt));
+    const hours=work.filter(x=>x.date?.startsWith(monthKey())).reduce((a,x)=>a+num(x.hours),0);
+    const ba=work.filter(x=>x.role==='Business Analyst'&&x.date?.startsWith(monthKey())).reduce((a,x)=>a+num(x.hours),0);
+    const items=state.careerItems.slice(0,8);
+    return `${pageHead('BA career development','Build evidence of your work, clarify allocation, and turn feedback into concrete next steps.')}
+      <div class="grid2">${stat('Logged work · month',`${hours.toFixed(1)}h`,'All roles')}${stat('BA hours · month',`${ba.toFixed(1)}h`,'Actual time recorded')}</div>
+      <section class="card" style="margin-top:13px"><div class="card-head"><h3>Work allocation & time log</h3></div><form data-form="work" class="stack">
+        <div class="form-grid"><div class="field"><label>Date</label><input type="date" name="date" value="${today()}" required></div><div class="field"><label>Role / allocation</label><select name="role">${optionList(['Technical Writer','Business Analyst','Other'],'Business Analyst')}</select></div><div class="field"><label>Hours actually spent</label><input type="number" name="hours" min="0" max="24" step="0.25" required placeholder="e.g. 2.5"></div><div class="field"><label>Timesheet / project code</label><input name="projectCode" placeholder="Optional"></div><div class="field span2"><label>Task / deliverable</label><input name="task" required placeholder="e.g. Stakeholder workshop, user stories, ERD updates"></div><div class="field"><label>Officially allocated?</label><select name="allocated">${optionList(['Yes','No','Unsure'],'Unsure')}</select></div><div class="field"><label>Billable / timesheet status</label><select name="timesheet">${optionList(['Recorded','Not recorded','Pending','Unsure'],'Pending')}</select></div><div class="field span2"><label>Blockers / context</label><textarea name="notes" placeholder="Optional. Record facts, not assumptions."></textarea></div></div>
+        <button class="btn primary full" type="submit">Add work log</button></form></section>
+      <section class="card" style="margin-top:13px"><div class="card-head"><h3>BA deliverable, feedback & decision log</h3></div><form data-form="career-item" class="stack">
+        <div class="form-grid"><div class="field"><label>Entry type</label><select name="type">${optionList(['Deliverable','Feedback','Requirement','User story','Acceptance criteria','Decision','Risk / issue','Action item','Meeting note'],'Deliverable')}</select></div><div class="field"><label>Status</label><select name="status">${optionList(['Open','In progress','Waiting','Done'],'Open')}</select></div><div class="field span2"><label>Title</label><input name="title" required placeholder="Short, searchable title"></div><div class="field span2"><label>Details / evidence</label><textarea name="details" placeholder="What was agreed, delivered, or observed?"></textarea></div><div class="field"><label>Owner (optional)</label><input name="owner" placeholder="Name / role"></div><div class="field"><label>Due date (optional)</label><input type="date" name="due"></div><div class="field span2"><label>Next action (especially for feedback)</label><input name="nextAction" placeholder="How will you respond or follow up?"></div></div>
+        <button class="btn full" type="submit">Save career entry</button></form></section>
+      <section class="card" style="margin-top:13px"><div class="card-head"><h3>Skills & learning log</h3></div><form data-form="learning" class="stack"><div class="form-grid"><div class="field"><label>Skill / topic</label><input name="skill" required placeholder="e.g. SQL, BPMN, requirements"></div><div class="field"><label>Hours spent</label><input name="hours" type="number" min="0" step="0.25" placeholder="Optional"></div><div class="field"><label>Resource / course</label><input name="resource" placeholder="Optional"></div><div class="field"><label>Status</label><select name="status">${optionList(['Planned','In progress','Completed'],'In progress')}</select></div><div class="field span2"><label>What did you learn / apply?</label><textarea name="notes" placeholder="A short learning note…"></textarea></div></div><button class="btn full" type="submit">Log learning</button></form></section>
+      <section class="card" style="margin-top:13px"><div class="card-head"><h3>Recent career entries</h3><span class="pill">${state.careerItems.length} total</span></div><div class="list">${items.map(x=>`<div class="list-item"><div class="item-main"><div class="item-title">${esc(x.title)} <span class="pill blue">${esc(x.type)}</span></div><div class="item-meta">${esc(x.date)} · ${esc(x.status)} ${x.due?`· Due ${esc(x.due)}`:''}<br>${esc(x.details||x.nextAction||'')}</div></div><button class="icon-btn" data-action="delete" data-key="careerItems" data-id="${esc(x.id)}">✕</button></div>`).join('')||empty('No career entries recorded yet.')}</div></section>
+      <section class="card" style="margin-top:13px"><div class="card-head"><h3>Recent work logs</h3><span class="pill">${work.length} entries</span></div><div class="list">${work.slice(0,10).map(x=>`<div class="list-item"><div class="item-main"><div class="item-title">${esc(x.role)} · ${esc(x.hours)}h</div><div class="item-meta">${esc(x.date)} · ${esc(x.task)}<br>Allocation: ${esc(x.allocated)} · Timesheet: ${esc(x.timesheet)} ${x.projectCode?`· ${esc(x.projectCode)}`:''}</div></div><button class="icon-btn" data-action="delete" data-key="workLogs" data-id="${esc(x.id)}">✕</button></div>`).join('')||empty('No work logs yet.')}</div></section>
+      <section class="card" style="margin-top:13px"><div class="card-head"><h3>Learning history</h3></div><div class="list">${state.learning.slice(0,8).map(x=>`<div class="list-item"><div class="item-main"><div class="item-title">${esc(x.skill)} · ${esc(x.status)}</div><div class="item-meta">${esc(x.date)} · ${esc(x.resource||'No resource added')} · ${esc(x.hours||0)}h<br>${esc(x.notes||'')}</div></div><button class="icon-btn" data-action="delete" data-key="learning" data-id="${esc(x.id)}">✕</button></div>`).join('')||empty('Add a learning entry after a course, practice session, or project task.')}</div></section>`;
+  }
+  function renderFinances(){
+    const m=monthKey(), tx=state.transactions.filter(x=>transactionFilter==='all'||x.date?.startsWith(m));
+    const income=tx.filter(x=>x.type==='Income').reduce((a,x)=>a+num(x.amount),0);
+    const expenses=tx.filter(x=>x.type!=='Income').reduce((a,x)=>a+num(x.amount),0);
+    const byCat={}; tx.filter(x=>x.type!=='Income').forEach(x=>byCat[x.category]=(byCat[x.category]||0)+num(x.amount));
+    const max=Math.max(1,...Object.values(byCat));
+    const debtTotal=state.debts.reduce((a,x)=>a+num(x.balance),0);
+    const categories=['Food','Housing','Transport','Utilities','Debt payment','Health','Family support','Shopping','Subscriptions','Savings','Other'];
+    return `${pageHead('Finances','Understand your cash flow, plan spending, and keep debt visible without judgment.',true)}
+      <div class="grid2">${stat('Income · selected period',money(income),'Recorded income','green')}${stat('Expenses · selected period',money(expenses),'Recorded outflow','red')}${stat('Net cash flow',money(income-expenses),'Income minus outflow',(income-expenses)>=0?'green':'red')}${stat('Tracked debt balance',money(debtTotal),'Update balances as they change','amber')}</div>
+      <section class="card" style="margin-top:13px"><div class="card-head"><h3>New transaction</h3></div><form data-form="transaction" class="stack"><div class="form-grid"><div class="field"><label>Type</label><select name="type">${optionList(['Expense','Income'],'Expense')}</select></div><div class="field"><label>Date</label><input type="date" name="date" value="${today()}" required></div><div class="field"><label>Amount (₱)</label><input type="number" name="amount" min="0.01" step="0.01" required placeholder="0.00"></div><div class="field"><label>Category</label><select name="category">${optionList(categories,'Food')}</select></div><div class="field"><label>Account / source</label><input name="account" placeholder="Cash, bank, e-wallet…"></div><div class="field"><label>Note</label><input name="note" placeholder="Optional"></div></div><button class="btn primary full" type="submit">Save transaction</button></form></section>
+      <section class="card" style="margin-top:13px"><div class="card-head"><h3>Spending by category</h3><span class="pill">${transactionFilter==='month'?'This month':'All time'}</span></div><div class="segmented" style="margin-bottom:12px"><button class="${transactionFilter==='month'?'selected':''}" data-action="tx-filter" data-value="month">This month</button><button class="${transactionFilter==='all'?'selected':''}" data-action="tx-filter" data-value="all">All time</button></div>${Object.entries(byCat).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`<div class="bar-row"><span>${esc(k)}</span><div class="bar-track"><span style="width:${Math.max(2,v/max*100)}%"></span></div><strong class="mono">${money(v)}</strong></div>`).join('')||empty('Transactions will appear here once recorded.')}</section>
+      <section class="card" style="margin-top:13px"><div class="card-head"><h3>Budget limits</h3></div><form data-form="budget" class="form-grid"><div class="field"><label>Category</label><select name="category">${optionList(categories,'Food')}</select></div><div class="field"><label>Monthly limit (₱)</label><input name="limit" type="number" min="0" step="0.01" required placeholder="e.g. 5000"></div><div class="span2"><button class="btn full" type="submit">Set / update budget</button></div></form><div class="divider"></div>${Object.entries(state.budgets).map(([cat,limit])=>{const used=state.transactions.filter(x=>x.type!=='Income'&&x.category===cat&&x.date?.startsWith(m)).reduce((a,x)=>a+num(x.amount),0);const pct=limit?Math.min(100,used/limit*100):0;return `<div style="margin:10px 0"><div class="row" style="display:flex;justify-content:space-between;gap:8px;font-size:12px"><strong>${esc(cat)}</strong><span class="muted">${money(used)} / ${money(limit)}</span></div><div class="progress"><span style="width:${pct}%;background:${used>limit?'var(--red)':'var(--green)'}"></span></div></div>`}).join('')||'<p class="small muted">No budgets set yet.</p>'}</section>
+      <section class="card" style="margin-top:13px"><div class="card-head"><h3>Debt tracker</h3></div><form data-form="debt" class="stack"><div class="form-grid"><div class="field"><label>Creditor / account</label><input name="name" required placeholder="e.g. Credit card"></div><div class="field"><label>Current balance (₱)</label><input name="balance" type="number" min="0" step="0.01" required placeholder="0.00"></div><div class="field"><label>Minimum payment (₱)</label><input name="minimum" type="number" min="0" step="0.01" placeholder="Optional"></div><div class="field"><label>Due date / day</label><input name="due" placeholder="e.g. 15th / 2026-11-15"></div><div class="field span2"><label>Interest rate / notes</label><input name="notes" placeholder="Optional; verify with your statement"></div></div><button class="btn full" type="submit">Add debt account</button></form><div class="divider"></div><div class="list">${state.debts.map(x=>`<div class="list-item"><div class="item-main"><div class="item-title">${esc(x.name)}</div><div class="item-meta">Balance ${money(x.balance)} · Minimum ${money(x.minimum)} · Due ${esc(x.due||'—')}<br>${esc(x.notes||'')}</div></div><div class="item-actions"><button class="icon-btn" data-action="debt-update" data-id="${esc(x.id)}">↻</button><button class="icon-btn" data-action="delete" data-key="debts" data-id="${esc(x.id)}">✕</button></div></div>`).join('')||empty('Add your accounts to see your total tracked debt.')}</div><p class="tiny muted" style="margin-top:10px">↻ lets you update the current balance. This tracker does not calculate lender-specific interest or payoff terms.</p></section>
+      <section class="card" style="margin-top:13px"><div class="card-head"><h3>Recent transactions</h3></div><div class="list">${tx.slice().sort((a,b)=>b.date.localeCompare(a.date)).slice(0,12).map(x=>`<div class="list-item"><div class="item-main"><div class="item-title">${esc(x.category)} · ${esc(x.note||x.account||x.type)}</div><div class="item-meta">${esc(x.date)} · ${esc(x.account||'No account')}</div></div><strong class="${x.type==='Income'?'green':'red'} mono">${x.type==='Income'?'+':'−'}${money(x.amount)}</strong><button class="icon-btn" data-action="delete" data-key="transactions" data-id="${esc(x.id)}">✕</button></div>`).join('')||empty('No transactions for this period.')}</div></section>`;
+  }
+  function renderLife(){
+    const categories=['Hobby','Friendship / Social','Family','Experience','Personal growth','Travel / Outdoors','Creativity','Rest / Wellbeing','Other'];
+    const goals=state.goals.slice().sort((a,b)=>(a.completed?1:0)-(b.completed?1:0));
+    return `${pageHead('Life & identity','Make room for the person you are outside your job title and responsibilities.',true)}
+      <section class="card"><div class="card-head"><h3>Personal direction</h3></div><form data-form="profile" class="stack"><div class="field"><label>What should this season of life stand for?</label><textarea name="focus" placeholder="A short statement you can return to…">${esc(state.profile.focus)}</textarea></div><button class="btn full" type="submit">Save personal direction</button></form></section>
+      <section class="card" style="margin-top:13px"><div class="card-head"><h3>Experiences & life goals</h3></div><form data-form="goal" class="stack"><div class="field"><label>Goal / experience</label><input name="title" required maxlength="150" placeholder="e.g. Explore a new hiking trail"></div><div class="form-grid"><div class="field"><label>Area</label><select name="category">${optionList(categories,'Experience')}</select></div><div class="field"><label>Target date (optional)</label><input name="date" type="date"></div></div><div class="field"><label>Why does this matter?</label><input name="why" placeholder="Optional"></div><button class="btn primary full" type="submit">Add to my life list</button></form><div class="divider"></div><div class="list">${goals.map(g=>`<div class="list-item"><button class="icon-btn" data-action="goal-toggle" data-id="${esc(g.id)}">${g.completed?'🟢':'◯'}</button><div class="item-main"><div class="item-title" style="${g.completed?'text-decoration:line-through;color:var(--muted)':''}">${esc(g.title)}</div><div class="item-meta">${esc(g.category)} ${g.date?`· ${esc(g.date)}`:''}${g.why?`<br>${esc(g.why)}`:''}</div></div><button class="icon-btn" data-action="delete" data-key="goals" data-id="${esc(g.id)}">✕</button></div>`).join('')||empty('Your life list can start with something small, local, and affordable.')}</div></section>
+      <section class="card" style="margin-top:13px"><div class="card-head"><h3>Meaningful moments & connection log</h3></div><form data-form="life-log" class="stack"><div class="form-grid"><div class="field"><label>Date</label><input name="date" type="date" value="${today()}" required></div><div class="field"><label>Type</label><select name="type">${optionList(['Social connection','Family time','Hobby','Outdoor activity','Rest day','Personal win','Something new'],'Social connection')}</select></div><div class="field span2"><label>What did you do?</label><input name="activity" required placeholder="A conversation, ride, meal, creative activity…"></div><div class="field span2"><label>How did it feel / what did you notice?</label><textarea name="reflection" placeholder="Optional reflection…"></textarea></div></div><button class="btn full" type="submit">Save moment</button></form></section>
+      <section class="card" style="margin-top:13px"><div class="card-head"><h3>Recent moments</h3></div><div class="list">${state.lifeLogs.slice(0,10).map(x=>`<div class="list-item"><div class="item-main"><div class="item-title">${esc(x.activity)}</div><div class="item-meta">${esc(x.date)} · ${esc(x.type)}<br>${esc(x.reflection||'')}</div></div><button class="icon-btn" data-action="delete" data-key="lifeLogs" data-id="${esc(x.id)}">✕</button></div>`).join('')||empty('Give meaningful experiences a place in your record—not just work achievements.')}</div></section>`;
+  }
+  function renderReviews(){
+    const reviews=state.weeklyReviews;
+    return `${pageHead('Weekly review','A calm 10-minute review to adjust your systems—not judge yourself.',true)}<section class="card"><form data-form="review" class="stack"><div class="field"><label>Week ending</label><input type="date" name="date" value="${today()}" required></div><div class="field"><label>What went well?</label><textarea name="wins" placeholder="Progress, effort, moments that mattered…"></textarea></div><div class="field"><label>What felt unsustainable?</label><textarea name="hard" placeholder="Workload, sleep, spending, triggers…"></textarea></div><div class="field"><label>What needs attention next week?</label><textarea name="focus" placeholder="One to three priorities…"></textarea></div><div class="field"><label>One thing I will deliberately make time for</label><input name="life" placeholder="Rest, hobby, connection…"></div><button class="btn primary full" type="submit">Save weekly review</button></form></section><section class="card" style="margin-top:13px"><div class="card-head"><h3>Past reviews</h3></div><div class="list">${reviews.map(x=>`<div class="list-item"><div class="item-main"><div class="item-title">Week ending ${esc(x.date)}</div><div class="item-meta"><strong>Wins:</strong> ${esc(x.wins||'—')}<br><strong>Hard:</strong> ${esc(x.hard||'—')}<br><strong>Next focus:</strong> ${esc(x.focus||'—')}<br><strong>Life:</strong> ${esc(x.life||'—')}</div></div><button class="icon-btn" data-action="delete" data-key="weeklyReviews" data-id="${esc(x.id)}">✕</button></div>`).join('')||empty('Your review history will appear here.')}</div></section>`;
+  }
+  function renderMore(){
+    if(sub==='body') return renderBody(); if(sub==='finance') return renderFinances(); if(sub==='life') return renderLife(); if(sub==='review') return renderReviews(); if(sub==='settings') return renderSettings();
+    return `${pageHead('Your life, in one place','Choose a space to work on. Keep the system useful, not overwhelming.')}
+      <div class="menu-grid">
+        <button class="menu-card" data-sub="body"><span class="emoji">◉</span><strong>Body & Health</strong><span>Sleep, energy, weight, symptoms, rehab status</span></button>
+        <button class="menu-card" data-sub="finance"><span class="emoji">₱</span><strong>Finances</strong><span>Cash flow, spending budgets, debt accounts</span></button>
+        <button class="menu-card" data-sub="life"><span class="emoji">✦</span><strong>Life & Identity</strong><span>Values, hobbies, relationships, experiences</span></button>
+        <button class="menu-card" data-sub="review"><span class="emoji">↻</span><strong>Weekly Review</strong><span>Reflect, adjust priorities, protect recovery</span></button>
+        <button class="menu-card" data-sub="settings"><span class="emoji">⚙</span><strong>Data & Settings</strong><span>Backup, restore, export and privacy</span></button>
+      </div>
+      <section class="card" style="margin-top:13px"><div class="card-head"><h3>Your current direction</h3></div><p class="small">${esc(state.profile.focus||'Add a personal direction in Life & Identity.')}</p></section>
+      <p class="tiny muted" id="saveStatus" style="text-align:center;margin-top:15px">Data stays in this browser on this device.</p>`;
+  }
+  function renderSettings(){
+    return `${pageHead('Data & settings','Your records are stored locally in this browser. Back up before clearing site data or changing devices.',true)}
+      <section class="card"><div class="card-head"><h3>Backup & restore</h3></div><div class="stack"><p class="small muted">Export a complete JSON backup to preserve all app data. Import a backup to restore it on this device. Importing replaces the current records.</p><button class="btn primary full" data-action="export">Export complete JSON backup</button><label class="btn full" style="text-align:center;display:block">Import JSON backup<input type="file" id="importFile" accept="application/json,.json" style="display:none"></label><button class="btn full" data-action="csv">Export finance transactions (CSV)</button></div></section>
+      <section class="card" style="margin-top:13px"><div class="card-head"><h3>Profile</h3></div><form data-form="settings-profile" class="stack"><div class="field"><label>Name / greeting</label><input name="name" value="${esc(state.profile.name)}" maxlength="50"></div><button class="btn full" type="submit">Save profile</button></form></section>
+      <section class="card" style="margin-top:13px"><div class="card-head"><h3>Local privacy & limitations</h3></div><ul class="small muted" style="padding-left:18px;line-height:1.7"><li>No account, cloud sync, analytics, or external API is used by this file.</li><li>Data is stored in this browser's local storage. Private browsing, clearing browser data, or uninstalling some browsers can erase it.</li><li>Backups may contain sensitive health, career, and financial details. Store them somewhere secure.</li><li>Offline use works after this HTML file has been saved locally. Browser installation as a PWA generally requires HTTPS or localhost and separate manifest/service-worker files.</li></ul></section>
+      <section class="card" style="margin-top:13px"><div class="card-head"><h3>Reset app data</h3></div><p class="small muted" style="margin-bottom:10px">This permanently deletes the records saved by this app in this browser. Export a backup first.</p><button class="btn danger full" data-action="reset">Delete all local app data</button></section>`;
+  }
+
+  // Navigation and action handling
+  document.addEventListener('click', e => {
+    const nav=e.target.closest('[data-tab]'); if(nav){ tab=nav.dataset.tab; sub='menu'; render(); return; }
+    const subBtn=e.target.closest('[data-sub]'); if(subBtn){ tab='more'; sub=subBtn.dataset.sub; render(); return; }
+    const btn=e.target.closest('[data-action]'); if(!btn) return;
+    const {action,id,key,value}=btn.dataset;
+    if(action==='back'){ sub='menu'; render(); }
+    if(action==='task-filter'){ taskFilter=value; render(); }
+    if(action==='tx-filter'){ transactionFilter=value; render(); }
+    if(action==='task-toggle'){ state.tasks=state.tasks.map(t=>t.id===id?{...t,completed:!t.completed,completedAt:!t.completed?new Date().toISOString():null}:t); save(); render(); }
+    if(action==='task-delete') delFrom('tasks',id);
+    if(action==='delete') delFrom(key,id);
+    if(action==='goal-toggle'){ state.goals=state.goals.map(g=>g.id===id?{...g,completed:!g.completed}:g); save(); render(); }
+    if(action==='urge-step'){ const p=$('#urgeMessage'); if(p) p.textContent='Pause started: breathe in gently, breathe out slowly, and let the urge rise and fall without acting on it. You can close this screen and return to your day.'; }
+    if(action==='export') exportJSON();
+    if(action==='csv') exportCSV();
+    if(action==='reset' && confirm('Delete ALL PROJECT RE:ALIGN data stored in this browser? Export a backup first if you may need these records.')){ localStorage.removeItem(KEY); state=defaults(); tab='today'; sub='menu'; render(); }
+    if(action==='debt-update'){ const debt=state.debts.find(x=>x.id===id); if(!debt)return; const next=prompt(`Enter updated balance for ${debt.name} (PHP):`,String(debt.balance)); if(next===null)return; if(!Number.isFinite(Number(next))||Number(next)<0){alert('Enter a valid non-negative amount.');return;} state.debts=state.debts.map(x=>x.id===id?{...x,balance:Number(next),updatedAt:new Date().toISOString()}:x); save(); render(); }
+  });
+  document.addEventListener('submit', e => {
+    const form=e.target.closest('form[data-form]'); if(!form)return; e.preventDefault(); const fd=new FormData(form); const v=Object.fromEntries(fd.entries()); const id=uid();
+    switch(form.dataset.form){
+      case 'task': state.tasks.unshift({id,title:v.title.trim(),category:v.category,date:v.date,priority:v.priority,hours:v.hours,completed:false,createdAt:new Date().toISOString()}); break;
+      case 'reflection': state.reflections[today()]={well:v.well,drained:v.drained,better:v.better}; break;
+      case 'recovery': {
+        const base={id,date:today(),time:new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}),createdAt:new Date().toISOString(),trigger:v.trigger,intensity:num(v.intensity),quantity:v.quantity,note:v.note};
+        if(v.outcome==='Craving only'||v.outcome==='Resisted') state.cravings.unshift({...base,outcome:v.outcome}); else state.nicotine.unshift({...base,outcome:v.outcome,product:v.outcome==='Used vape'?'Vape':'Cigarette'}); break;
+      }
+      case 'health': state.health.unshift({...v,id,sleep:v.sleep?num(v.sleep):'',water:v.water?num(v.water):'',weight:v.weight?num(v.weight):'',energy:v.energy?num(v.energy):'',pain:v.pain?num(v.pain):'',createdAt:new Date().toISOString()}); break;
+      case 'health-settings': state.healthSettings={clearance:v.clearance,restrictions:v.restrictions,nextAppointment:v.nextAppointment}; break;
+      case 'work': state.workLogs.unshift({...v,id,hours:num(v.hours),createdAt:new Date().toISOString()}); break;
+      case 'career-item': state.careerItems.unshift({...v,id,date:today(),createdAt:new Date().toISOString()}); break;
+      case 'learning': state.learning.unshift({...v,id,date:today(),hours:num(v.hours),createdAt:new Date().toISOString()}); break;
+      case 'transaction': { const amount=num(v.amount); if(amount<=0){alert('Enter an amount greater than zero.');return;} state.transactions.unshift({...v,id,amount,createdAt:new Date().toISOString()}); break; }
+      case 'budget': { const limit=num(v.limit); if(limit<0){alert('Enter a valid budget.');return;} state.budgets[v.category]=limit; break; }
+      case 'debt': state.debts.unshift({...v,id,balance:num(v.balance),minimum:num(v.minimum),createdAt:new Date().toISOString()}); break;
+      case 'profile': state.profile={...state.profile,focus:v.focus}; break;
+      case 'goal': state.goals.unshift({...v,id,completed:false,createdAt:new Date().toISOString()}); break;
+      case 'life-log': state.lifeLogs.unshift({...v,id,createdAt:new Date().toISOString()}); break;
+      case 'review': state.weeklyReviews.unshift({...v,id,createdAt:new Date().toISOString()}); break;
+      case 'settings-profile': state.profile={...state.profile,name:v.name.trim()}; break;
+    }
+    save(); render();
+  });
+  document.addEventListener('change', e => {
+    if(e.target.id==='importFile' && e.target.files?.[0]) importJSON(e.target.files[0]);
+  });
+  function download(filename,content,type){ const blob=new Blob([content],{type}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=filename; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),1000); }
+  function exportJSON(){ const backup={...state,exportedAt:new Date().toISOString(),app:'PROJECT RE:ALIGN'}; download(`ProjectRE_ALIGN_Backup_${today()}.json`,JSON.stringify(backup,null,2),'application/json'); }
+  function csvCell(v){ const s=String(v??''); return `"${s.replace(/"/g,'""')}"`; }
+  function exportCSV(){ const rows=[['Date','Type','Amount PHP','Category','Account','Note'],...state.transactions.map(x=>[x.date,x.type,x.amount,x.category,x.account,x.note])]; download(`ProjectRE_ALIGN_Finances_${today()}.csv`,rows.map(r=>r.map(csvCell).join(',')).join('\r\n'),'text/csv;charset=utf-8'); }
+  async function importJSON(file){ try { const text=await file.text(); const parsed=JSON.parse(text); if(!parsed||typeof parsed!=='object'||!Array.isArray(parsed.tasks)||!Array.isArray(parsed.transactions)) throw new Error('This does not look like a PROJECT RE:ALIGN backup.'); if(!confirm('Import this backup and replace all current app data?')) return; const base=defaults(); state={...base,...parsed,profile:{...base.profile,...(parsed.profile||{})},healthSettings:{...base.healthSettings,...(parsed.healthSettings||{})}}; delete state.exportedAt; delete state.app; save(); tab='today'; sub='menu'; render(); alert('Backup restored successfully on this device.'); } catch(err){ alert(`Could not import backup: ${err.message}`); } finally { const input=$('#importFile'); if(input) input.value=''; } }
+
+  // Upgrade the previous prototype's data format where practical.
+  if(!localStorage.getItem(KEY)){
+    try {
+      const oldKeys={tasks:'re_tasks',nicotine:'re_ciglogs',cravings:'re_cravings',health:'re_health',careerItems:'re_career',transactions:'re_finance',goals:'re_life'};
+      let migrated=false;
+      for(const [next,old] of Object.entries(oldKeys)){ const raw=localStorage.getItem(old); if(raw){ const data=JSON.parse(raw); if(Array.isArray(data)){ state[next]=data.map(x=>{ const base={...x,id:x.id||uid()}; if(next==='tasks') return {...base,title:x.title||x.text||'Untitled task'}; if(next==='careerItems') return {...base,title:x.title||x.note||'Career entry',details:x.details||x.note||'',status:x.status||'Open'}; if(next==='goals') return {...base,title:x.title||x.text||'Untitled goal'}; if(next==='cravings') return {...base,outcome:x.outcome||'Resisted'}; return base; }); migrated=true; } } }
+      const refs=localStorage.getItem('re_reflections'); if(refs){state.reflections=JSON.parse(refs);migrated=true;}
+      if(migrated){save(); console.info('Previous PROJECT RE records were migrated where compatible.');}
+    } catch(err){ console.warn('Legacy data migration skipped',err); }
+  }
+  render();
+})();
+</script>
+<script>
+  // Register the service worker only on secure origins (HTTPS or localhost).
+  if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js', { scope: './' })
+        .catch(err => console.warn('Offline app setup could not be completed:', err));
+    });
+  }
+</script>
+</body>
+</html>

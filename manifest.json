@@ -1,0 +1,18 @@
+{
+  "id": "./",
+  "name": "PROJECT RE:ALIGN",
+  "short_name": "RE:ALIGN",
+  "description": "A private, offline-first personal planning and life management app.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
+  "orientation": "any",
+  "background_color": "#101310",
+  "theme_color": "#101310",
+  "icons": [
+    { "src": "./icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "./icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "./icons/icon-512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
